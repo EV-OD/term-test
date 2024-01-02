@@ -1,6 +1,7 @@
 import { writable, type Writable } from "svelte/store";
 import type XtermController from "./xterm";
 import { commands } from "./commands";
+import { autoComplete } from "./utils";
 
 class AutoCompleteSession {
   helper: {};
@@ -33,14 +34,19 @@ class AutoCompleteSession {
   }
   setString(value: string) {
     this.currentCommand = value;
-    this.updateAutoCompleteList();
+    return this.updateAutoCompleteList();
   }
   hide() {
     this.visible = false;
     this.elt.style.visibility = "hidden";
   }
   updateAutoCompleteList() {
-    this.autoCompleteList.set(this.currentCommand.split(" "));
+    let a = autoComplete(this.currentCommand, this.helper);
+    if (a.length == 0) {
+      return false;
+    }
+    this.autoCompleteList.set(a);
+    return true;
   }
   show(obj?: { x: number; y: number }) {
     if (obj) {

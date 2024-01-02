@@ -58,8 +58,11 @@ class XtermController {
     if (command.length == 0) {
       return this.autoCompleteSession.hide();
     }
-    this.autoCompleteSession.setString(command);
-    this.autoCompleteSession.show(this.getCursorPosition());
+    if (this.autoCompleteSession.setString(command)) {
+      this.autoCompleteSession.show(this.getCursorPosition());
+    } else {
+      this.autoCompleteSession.hide();
+    }
   }
 
   clearInput(command: string) {

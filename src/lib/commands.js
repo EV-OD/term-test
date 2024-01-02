@@ -22,4 +22,26 @@ export let commands = {
       },
     },
   },
+  gh: {
+    isComplete: false,
+    type: "gh",
+    args: {
+      pr: {
+        type: "pr",
+        isNameAndCommandSame: true,
+        isComplete: false,
+      },
+    },
+  },
+  npm: {
+    isComplete: false,
+    type: "npm",
+    args: {
+      install: {
+        type: "install",
+        isNameAndCommandSame: true,
+        isComplete: false,
+      },
+    },
+  },
 };
