@@ -17,8 +17,22 @@
     onMount(()=>{
         let term = new Terminal({
             cursorBlink: true,
+            fontSize: 16,
+            fontFamily: '"Menlo for Powerline", Menlo, Consolas, "Liberation Mono", Courier, monospace',
             theme: {
-                background: 'rgb(50,50,50)'  // change background
+                foreground: '#d2d2d2',
+                background: '#2b2b2b',
+                cursor: '#adadad',
+                black: '#000000',
+                red: '#d81e00',
+                green: '#5ea702',
+                yellow: '#cfae00',
+                blue: '#427ab3',
+                magenta: '#89658e',
+                cyan: '#00a7aa',
+                white: '#dbded8',
+                brightBlack: '#686a66',
+                brightRed: '#f54235',
             }
         });
         fitAddon = new FitAddon();
@@ -38,4 +52,5 @@
   </main>
   
   <style>
+
   </style>

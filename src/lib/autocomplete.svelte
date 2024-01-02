@@ -56,8 +56,23 @@
   
     // Run the function and close the autocomplete list
     function runFunction(item: string) {
-      console.log("Selected item:", item);
-      autocompleteList = [];
+        console.log("Selected item:", item);
+
+        // Set the selected item as the new input value
+        const currentCommand = xTerm.command || '';
+        const parts = currentCommand.trim().split(/\s+/);
+
+        if (parts.length > 0) {
+            // Replace the last part of the input with the selected item
+            parts[parts.length - 1] = item;
+            
+            // Reconstruct the input with the completed part
+            const newCommand = parts.join(' ');
+            
+            // Set the updated input in the terminal
+            xTerm.updateCommand(newCommand);
+        }
+        autocompleteList = [];
       // Add your logic to run the function based on the selected item
     }
   </script>
@@ -65,12 +80,12 @@
   <svelte:document on:keyup={handleKeyUp} />
   
   <div class="absolute left-0 top-0 h-10 min-w-[200px] w-max" bind:this={elt}>
-    <ul class=" ml-2 bg-slate-600 rounded-md overflow-hidden text-white">
+    <ul class=" ml-2 bg-slate-800 rounded-md overflow-hidden text-white shadow-md">
       {#each autocompleteList as item}
       <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <li
-        class="flex items-center gap-3 p-2 px-5 text-sm bg-slate-700 hover:bg-gray-800 cursor-pointer"
+        class="flex items-center gap-3 p-2 px-5 text-sm bg-neutral-700 hover:bg-indigo-800 cursor-pointer"
         class:selected={selected === item}
         on:click={() => handleClick(item)}
       >
@@ -96,7 +111,7 @@
 
   <style>
     .selected {
-        @apply bg-gray-800 text-white;
+        @apply bg-indigo-800;
     }
   </style>
   

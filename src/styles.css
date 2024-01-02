@@ -9,3 +9,7 @@ body {
 #app {
   /* overflow: hidden; */
 }
+
+.xterm-rows {
+  padding-inline: 5px;
+}

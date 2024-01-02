@@ -64,6 +64,11 @@ class XtermController {
       this.autoCompleteSession.hide();
     }
   }
+  updateCommand(c: string) {
+    this.clearInput(this.command);
+    this.command = c;
+    this.term.write(c);
+  }
 
   clearInput(command: string) {
     const inputLength = command.length;
