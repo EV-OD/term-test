@@ -48,13 +48,17 @@ class XtermController {
           ) {
             this.command += e;
             this.term.write(e);
-            this.autoCompleteSession.setString(this.command);
             this.updateAutoComplete();
           }
       }
     });
   }
   updateAutoComplete() {
+    let command = this.command;
+    if (command.length == 0) {
+      return this.autoCompleteSession.hide();
+    }
+    this.autoCompleteSession.setString(command);
     this.autoCompleteSession.show(this.getCursorPosition());
   }
 

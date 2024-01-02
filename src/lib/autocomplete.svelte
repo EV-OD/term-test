@@ -9,12 +9,16 @@
     let selected:string|null = null;
     export let autoComplete:AutoCompleteSession;
     export let xTerm:XtermController;
+
     onMount(()=>{
         autoComplete = new AutoCompleteSession(elt,xTerm);
     })
     $:{
         if(xTerm){
             autoComplete.xTerm = xTerm
+            autoComplete.autoCompleteList.subscribe((v)=>{
+                autocompleteList = v
+            })
         }
     }
 
