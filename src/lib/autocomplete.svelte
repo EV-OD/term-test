@@ -5,14 +5,13 @@
   
     let elt: HTMLDivElement;
     let showList = true;
-    let autocompleteList = ["lol", "fuck"];
+    let autocompleteList:string[] = [];
     let selected: string | null = null;
     export let autoComplete: AutoCompleteSession;
     export let xTerm: XtermController;
   
     onMount(() => {
       autoComplete = new AutoCompleteSession(elt, xTerm);
-  
     });
   
     $: {
@@ -20,14 +19,14 @@
         autoComplete.xTerm = xTerm;
         autoComplete.autoCompleteList.subscribe((v) => {
           autocompleteList = v;
+          selected = autocompleteList[0]
         });
       }
     }
   
-    // Handle keydown event
-    function handleKeyDown(event: KeyboardEvent) {
+    // Handle keyup event
+    function handleKeyUp(event: KeyboardEvent) {
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-        // Prevent default to avoid scrolling the page
         event.preventDefault();
   
         // Move selection based on arrow key
@@ -38,10 +37,12 @@
           newIndex =
             currentIndex < autocompleteList.length - 1 ? currentIndex + 1 : 0;
         } else {
-          newIndex = currentIndex > 0 ? currentIndex - 1 : autocompleteList.length - 1;
+          newIndex =
+            currentIndex > 0 ? currentIndex - 1 : autocompleteList.length - 1;
         }
-  
+        
         selected = autocompleteList[newIndex];
+        
       } else if (event.key === "Enter" && selected !== null) {
         // Run the function on Enter key press
         runFunction(selected);
@@ -60,15 +61,16 @@
       // Add your logic to run the function based on the selected item
     }
   </script>
-<svelte:document on:keydown={handleKeyDown} />
+  
+  <svelte:document on:keyup={handleKeyUp} />
   
   <div class="absolute left-0 top-0 h-10 min-w-[200px] w-max" bind:this={elt}>
-    <ul class="bg-black border rounded-md shadow-md ml-2">
+    <ul class=" ml-2 bg-slate-600 rounded-md overflow-hidden text-white">
       {#each autocompleteList as item}
       <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <li
-        class="flex items-center gap-3 p-2 px-5 hover:bg-gray-800 hover:text-white bg-black transition-colors duration-100 cursor-pointer"
+        class="flex items-center gap-3 p-2 px-5 text-sm bg-slate-700 hover:bg-gray-800 cursor-pointer"
         class:selected={selected === item}
         on:click={() => handleClick(item)}
       >
@@ -91,4 +93,10 @@
       {/each}
     </ul>
   </div>
+
+  <style>
+    .selected {
+        @apply bg-gray-800 text-white;
+    }
+  </style>
   

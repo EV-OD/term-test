@@ -16,7 +16,10 @@
 
     onMount(()=>{
         let term = new Terminal({
-            cursorBlink: true
+            cursorBlink: true,
+            theme: {
+                background: 'rgb(50,50,50)'  // change background
+            }
         });
         fitAddon = new FitAddon();
         term.loadAddon(fitAddon);
