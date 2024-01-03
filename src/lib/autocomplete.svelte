@@ -2,11 +2,12 @@
     import { onMount } from "svelte";
     import AutoCompleteSession from "./autocomplete";
     import type XtermController from "./xterm";
-  
+  import { splitStringIntoArrayWithSpaces } from "./utils";
+    type ItemType = { name: string; id: string; isNameAndCommandSame: boolean; type: string, spaceCount:number, depth:number }
     let elt: HTMLDivElement;
     let showList = true;
-    let autocompleteList:string[] = [];
-    let selected: string | null = null;
+    let autocompleteList: ItemType[] = [];
+    let selected: ItemType | null = null;
     export let autoComplete: AutoCompleteSession;
     export let xTerm: XtermController;
   
@@ -49,32 +50,34 @@
       }
     }
   
-    // Run the function on click
-    function handleClick(item: string) {
+    function handleClick(item:ItemType) {
       runFunction(item);
     }
   
-    // Run the function and close the autocomplete list
-    function runFunction(item: string) {
-        console.log("Selected item:", item);
+  function runFunction(item:ItemType ) {
+    const currentCommand = xTerm.command || '';
+    let parts = currentCommand.trim().split(/\s+/);
+    let spaceparts = splitStringIntoArrayWithSpaces(currentCommand)
+    spaceparts = spaceparts.filter(s=> s.length > 0)
 
-        // Set the selected item as the new input value
-        const currentCommand = xTerm.command || '';
-        const parts = currentCommand.trim().split(/\s+/);
 
-        if (parts.length > 0) {
-            // Replace the last part of the input with the selected item
-            parts[parts.length - 1] = item;
-            
-            // Reconstruct the input with the completed part
-            const newCommand = parts.join(' ');
-            
-            // Set the updated input in the terminal
-            xTerm.updateCommand(newCommand);
-        }
-        autocompleteList = [];
-      // Add your logic to run the function based on the selected item
+    if (parts.length > 0) {
+      let lastItem = spaceparts[spaceparts.length - 1]
+      if(lastItem === " "){
+        parts.push(item.name)
+      }else{
+        parts[parts.length - 1] = item.name
+      }
+      parts = parts.filter(s=> s != " ")
+      const newCommand = parts.join(" ");
+
+      xTerm.updateCommand(newCommand);
+    } else {
+      xTerm.updateCommand(item.name);
     }
+
+    autocompleteList = [];
+  }
   </script>
   
   <svelte:document on:keyup={handleKeyUp} />
@@ -103,7 +106,7 @@
             d="M9 5l7 7-7 7"
           />
         </svg>
-        <span class="text-white">{item}</span>
+        <span class="text-white">{item.name}</span>
       </li>
       {/each}
     </ul>

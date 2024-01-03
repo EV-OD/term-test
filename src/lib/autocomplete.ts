@@ -2,6 +2,14 @@ import { writable, type Writable } from "svelte/store";
 import type XtermController from "./xterm";
 import { commands } from "./commands";
 import { autoComplete } from "./utils";
+type ItemType = {
+  name: string;
+  id: string;
+  isNameAndCommandSame: boolean;
+  type: string;
+  spaceCount: number;
+  depth: number;
+};
 
 class AutoCompleteSession {
   helper: {};
@@ -12,7 +20,7 @@ class AutoCompleteSession {
   xTerm: XtermController;
   lineHeightOffset: number;
   currentCommand: string;
-  autoCompleteList: Writable<string[]>;
+  autoCompleteList: Writable<ItemType[]>;
   constructor(elt: HTMLElement, xTerm: XtermController) {
     this.helper = commands;
     this.visible = false;
@@ -23,7 +31,7 @@ class AutoCompleteSession {
     this.lineHeight = 0;
     this.lineHeightOffset = 10;
     this.currentCommand = "";
-    this.autoCompleteList = writable(["commit"]);
+    this.autoCompleteList = writable([]);
   }
   getLineHeight() {
     this.lineHeight =
@@ -42,6 +50,7 @@ class AutoCompleteSession {
   }
   updateAutoCompleteList() {
     let a = autoComplete(this.currentCommand, this.helper);
+
     if (a.length == 0) {
       return false;
     }

@@ -1,61 +1,85 @@
 import { Terminal } from "xterm";
 import type AutoCompleteSession from "./autocomplete";
 
+interface CommandType {
+  name: string;
+  id: string;
+  isNameAndCommandSame: boolean;
+  type: string;
+}
+
 class XtermController {
   term: Terminal;
   command: string;
   autoCompleteSession: AutoCompleteSession;
+  commandObj: CommandType[];
+  spaceCount: number;
 
   constructor(term: Terminal, autoComplete: AutoCompleteSession) {
     this.term = term;
     this.command = "";
+    this.commandObj = [];
+    this.spaceCount = 0;
     this.autoCompleteSession = autoComplete;
     this.init();
   }
 
   init() {
-    this.prompt(this.term);
-    this.term.onData((e) => {
-      switch (e) {
-        case "\u0003": // Ctrl+C
-          this.term.write("^C");
-          this.prompt(this.term);
-          break;
-        case "\r": // Enter
-          this.runCommand(this.term, this.command);
-          this.command = "";
-          // this.updateAutoComplete();
-          this.autoCompleteSession.hide();
-          break;
-        case "\u007F": // Backspace (DEL)
-          // Do not delete the prompt
-          if (this.term.buffer.active.cursorX > 2) {
-            this.term.write("\b \b");
-            if (this.command.length > 0) {
-              this.command = this.command.slice(0, -1);
-            }
-            this.updateAutoComplete();
-          }
-          break;
-        case "\u0009":
-          // console.log("tabbed", this.output, ["dd", "ls"]);
-          break;
-        default:
-          if (
-            (e >= String.fromCharCode(0x20) &&
-              e <= String.fromCharCode(0x7e)) ||
-            e >= "\u00a0"
-          ) {
-            this.command += e;
-            this.term.write(e);
-            this.updateAutoComplete();
-          }
-      }
-    });
+    this.prompt();
+    this.term.onData((e) => this.handleKeyPress(e));
   }
+
+  handleKeyPress(key: string) {
+    switch (key) {
+      case "\u0003": // Ctrl+C
+        this.term.write("^C");
+        this.prompt();
+        break;
+      case "\r": // Enter
+        if (!this.autoCompleteSession.visible) {
+          this.runCommand();
+          this.command = "";
+        }
+        this.autoCompleteSession.hide();
+        break;
+      case "\u007F": // Backspace (DEL)
+        this.handleBackspace();
+        break;
+      default:
+        this.handleDefaultKey(key);
+    }
+  }
+
+  handleBackspace() {
+    if (this.spaceCount > 0) {
+      this.spaceCount--;
+    }
+    if (this.term.buffer.active.cursorX > 2) {
+      this.term.write("\b \b");
+      if (this.command.length > 0) {
+        this.command = this.command.slice(0, -1);
+      }
+      this.updateAutoComplete();
+    }
+  }
+
+  handleDefaultKey(key: string) {
+    if (
+      (key >= String.fromCharCode(0x20) && key <= String.fromCharCode(0x7e)) ||
+      key >= "\u00a0"
+    ) {
+      this.command += key;
+      this.term.write(key);
+      this.updateAutoComplete();
+    }
+    if (key === " ") {
+      this.spaceCount++;
+    }
+  }
+
   updateAutoComplete() {
     let command = this.command;
-    if (command.length == 0) {
+    if (command.length === 0) {
       return this.autoCompleteSession.hide();
     }
     if (this.autoCompleteSession.setString(command)) {
@@ -64,10 +88,24 @@ class XtermController {
       this.autoCompleteSession.hide();
     }
   }
+
+  appendCommandObj(obj: CommandType) {
+    this.commandObj.push(obj);
+  }
+
+  clearCommandObj() {
+    this.commandObj = [];
+  }
+
   updateCommand(c: string) {
     this.clearInput(this.command);
     this.command = c;
     this.term.write(c);
+  }
+
+  writeCommand(obj: CommandType) {
+    this.appendCommandObj(obj);
+    this.command = obj.name;
   }
 
   clearInput(command: string) {
@@ -77,25 +115,22 @@ class XtermController {
     }
   }
 
-  prompt(term: Terminal) {
+  prompt() {
     this.command = "";
-    term.write("\r\n$ ");
+    this.term.write("\r\n$ ");
   }
 
-  onMessage(event: MessageEvent) {
-    this.term.write(event.data);
-  }
-
-  runCommand(term: Terminal, command: string) {
-    if (command.length > 0) {
-      term.writeln(""); // Move to the next line for better visibility
-      term.writeln(`Executing command: ${command}`);
+  runCommand() {
+    if (this.command.length > 0) {
+      this.term.writeln(""); // Move to the next line for better visibility
+      this.term.writeln(`Executing command: ${this.command}`);
       // Add logic to handle the actual command execution here
       // For example, you can use tauri.promisified to communicate with your Tauri backend
-      // tauri.promisified('execute_command', { command });
+      // tauri.promisified('execute_command', { command: this.command });
     }
-    this.prompt(term); // Add a new prompt line after command execution
+    this.prompt(); // Add a new prompt line after command execution
   }
+
   getCursorPosition(): { x: number; y: number } {
     const cursorX = this.term.buffer.active.cursorX;
     const cursorY =
