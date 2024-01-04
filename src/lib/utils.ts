@@ -69,27 +69,21 @@ function autoComplete(
         }));
       return availableSubcommands;
     } else {
-      // Recursively traverse into subcommands
-      // if (spaceCount == depth + 1) {
-      //   const subCommand = cmdStructure[matchingCommands[0]].args;
-      //   let keys = Object.keys(subCommand);
-      //   let arry = [];
-      //   for (let i = 0; i < keys.length; i++) {
-      //     arry.push({
-      //       ...subCommand[keys[i]],
-      //       name: keys[i],
-      //       spaceCount,
-      //       depth: depth,
-      //     });
-      //   }
-      //   return arry;
-      // }
-      return autoComplete(
-        remainingInput,
-        subCommand.args,
-        depth + 1,
-        spaceCount
-      );
+      if (spaceCount == depth + 1 && remainingInput.length == 0) {
+        const subCommand = cmdStructure[matchingCommands[0]].args;
+        let keys = Object.keys(subCommand);
+        let arry = [];
+        for (let i = 0; i < keys.length; i++) {
+          arry.push({
+            ...subCommand[keys[i]],
+            name: keys[i],
+            depth: depth + 1,
+            spaceCount,
+          });
+        }
+        return arry;
+      }
+      return autoComplete(remainingInput, subCommand.args, depth, spaceCount);
     }
   } else if (matchingCommands.length > 0) {
     // If there are multiple matching commands, return the matching commands themselves

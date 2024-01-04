@@ -47,7 +47,7 @@
   </script>
   
   <main>
-    <div class="w-full h-56" bind:this={termContainer}></div>
+    <div class="w-full h-96" bind:this={termContainer}></div>
     <Autocomplete bind:autoComplete {xTerm} />
   </main>
   
